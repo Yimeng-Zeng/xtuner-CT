@@ -250,8 +250,23 @@ def qwen3_vl_sft_collator(
         for data in instance:
             num_img_tokens.extend(data["num_img_tokens"])
 
-        pixel_values = torch.cat([i["pixel_values"] for i in instance if "pixel_values" in i], dim=0)
-        image_grid_thw = torch.cat([i["image_grid_thw"] for i in instance if "image_grid_thw" in i], dim=0)
+        # # import ipdb; ipdb.set_trace() #TODO: fix bug here
+        # try:
+        #     pixel_values = torch.cat([i["pixel_values"] for i in instance if "pixel_values" in i], dim=0)
+        #     image_grid_thw = torch.cat([i["image_grid_thw"] for i in instance if "image_grid_thw" in i], dim=0)
+        # except Exception as e:
+        #     import ipdb; ipdb.set_trace()
+
+        pixel_values_list = [i["pixel_values"] for i in instance if "pixel_values" in i]
+        image_grid_thw_list = [i["image_grid_thw"] for i in instance if "image_grid_thw" in i]
+
+        if pixel_values_list:
+            pixel_values = torch.cat(pixel_values_list, dim=0)
+            image_grid_thw = torch.cat(image_grid_thw_list, dim=0)
+        else:
+            # Handle text-only samples without images
+            pixel_values = None
+            image_grid_thw = None
 
         seq_ctx = SequenceContext(
             input_ids=input_ids,  # type: ignore
